@@ -1,0 +1,1 @@
+create table ACCOUNT(id bigint auto_increment, username varchar(255), account_number varchar(255), default_account boolean, create_at timestamp, last_modified timestamp);
