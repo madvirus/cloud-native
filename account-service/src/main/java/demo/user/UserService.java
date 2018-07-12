@@ -23,7 +23,7 @@ public class UserService {
     }
 
     public User getAuthenticatedUser() {
-        URI uri = URI.create(String.format("http://%s/uaa/v1/me", serviceHost));
+        URI uri = URI.create(String.format("http://%s:8888/uaa/v1/me", serviceHost));
         RequestEntity<Void> request = RequestEntity.get(uri).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).build();
         return restTemplate.exchange(request, User.class).getBody();
     }

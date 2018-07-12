@@ -32,7 +32,7 @@ public class RestClientSliceTest {
     @Test
     public void getAuthenticatedUser() {
         String jsonBody = "{\"id\": 1, \"username\": \"name\", \"firstName\": \"first\", \"lastName\": \"last\"}";
-        server.expect(requestTo("http://" + serviceHost + "/uaa/v1/me"))
+        server.expect(requestTo("http://" + serviceHost + ":8888/uaa/v1/me"))
                 .andRespond(withSuccess(jsonBody, MediaType.APPLICATION_JSON));
         User user = userService.getAuthenticatedUser();
         assertThat(user.getId()).isEqualTo(1L);
