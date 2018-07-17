@@ -8,9 +8,10 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -21,16 +22,19 @@ import java.util.concurrent.Callable;
 @RestController
 @RequestMapping("/customers/{id}/photo")
 public class CustomerProfilePhotoRestController {
-    private File root = new File(".");
+    private File root;
     private final CustomerRepository customerRepository;
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     public CustomerProfilePhotoRestController(
-            @Value("${upload.dir:${user.home}/images") String uploadDir,
+            @Value("${upload.dir:${user.home}/images}") String uploadDir,
             CustomerRepository customerRepository) {
         this.root = new File(uploadDir);
         this.customerRepository = customerRepository;
+
+        Assert.isTrue(root.exists() || root.mkdirs(),
+                String.format("The path %s mest exists.", root.getAbsolutePath()));
     }
 
     @GetMapping
@@ -44,6 +48,30 @@ public class CustomerProfilePhotoRestController {
                             .body(fileResource);
                 }).orElseThrow(() -> new CustomerNotFoundException(id));
     }
+
+    @GetMapping("/deferred")
+    public DeferredResult<ResponseEntity<?>> deferred(@PathVariable Long id) {
+        DeferredResult<ResponseEntity<?>> defer = new DeferredResult<>();
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+            }
+            ResponseEntity<?> resp = customerRepository.findById(id)
+                    .map(customer -> {
+                        File file = fileFor(customer);
+                        return new FileSystemResource(file);
+                    })
+                    .map(res -> ResponseEntity.ok()
+                            .contentType(MediaType.IMAGE_JPEG)
+                            .body(res))
+                    .orElse(ResponseEntity.notFound().build());
+
+            defer.setResult(resp);
+        }).start();
+        return defer;
+    }
+
 
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
     Callable<ResponseEntity<?>> write(@PathVariable("id") Long id,

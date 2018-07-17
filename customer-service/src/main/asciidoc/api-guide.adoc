@@ -1,0 +1,19 @@
+= API 가이드
+;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 4
+:sectlinks:
+
+[[customers]]
+== 고객 목록
+
+API 기본 구조
+
+	GET /api/home/data
+
+응답 구조
+
+include::{snippets}/customers/response-fields.adoc[]

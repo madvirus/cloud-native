@@ -2,17 +2,20 @@ package demo;
 
 public class Customer {
     private Long id;
-    private String firatName;
+    private String firstName;
     private String lastName;
 
-    public Customer(Long id, String firatName, String lastName) {
+    public Customer() {
+    }
+
+    public Customer(Long id, String firstName, String lastName) {
         this.id = id;
-        this.firatName = firatName;
+        this.firstName = firstName;
         this.lastName = lastName;
     }
 
-    public Customer(String firatName, String lastName) {
-        this.firatName = firatName;
+    public Customer(String firstName, String lastName) {
+        this.firstName = firstName;
         this.lastName = lastName;
     }
 
@@ -24,8 +27,8 @@ public class Customer {
         return id;
     }
 
-    public String getFiratName() {
-        return firatName;
+    public String getFirstName() {
+        return firstName;
     }
 
     public String getLastName() {
