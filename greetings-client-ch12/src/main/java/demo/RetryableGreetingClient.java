@@ -28,9 +28,9 @@ public class RetryableGreetingClient {
         this.serviceUri = serviceUri;
     }
 
-    @Retryable(include = Exception.class, maxAttempts = 4, backoff = @Backoff(multiplier = 2))
+    @Retryable(maxAttempts = 4, backoff = @Backoff(value = 2000L, multiplier = 2))
     public String greet(String name) {
-        logger.info("attempting to call the greeting-service-ch12 " + new Date());
+        logger.info("attempting to call the greeting-service");
 
         ParameterizedTypeReference<Map<String, String>> ptr =
                 new ParameterizedTypeReference<Map<String, String>>() {};

@@ -8,12 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Date;
 import java.util.Map;
 
 @Component
@@ -23,16 +20,14 @@ public class CBGreetingClient {
     private final RestTemplate restTemplate;
     private final String serviceUri;
 
-    @Autowired
-    public CBGreetingClient(RestTemplate restTemplate,
-                            @Value("${greeting-service.uri}") String serviceUri) {
-        this.restTemplate = restTemplate;
-        this.serviceUri = serviceUri;
-    }
-
-    @HystrixCommand(commandKey = "greet1")
-    public String greet(String name) {
-        logger.info("HYSTRIX01 attempting to call the greeting-service-ch12 " + new Date());
+    @HystrixCommand(commandProperties = {
+            @HystrixProperty(name = "metrics.rollingStats.timeInMilliseconds", value="10000"), // 10초 동안
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value="6"), // 6개 이상 요청
+            @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value="30"), // 30% 이상 실패
+            @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds", value="20000"), // 20초 동안 서킷 오픈
+    })
+    public String greet1(String name) {
+        logger.info("HYSTRIX01 : call the greeting-service-ch12");
 
         ParameterizedTypeReference<Map<String, String>> ptr =
                 new ParameterizedTypeReference<Map<String, String>>() {};
@@ -42,13 +37,20 @@ public class CBGreetingClient {
                 .get("greeting");
     }
 
+    @Autowired
+    public CBGreetingClient(RestTemplate restTemplate,
+                            @Value("${greeting-service.uri}") String serviceUri) {
+        this.restTemplate = restTemplate;
+        this.serviceUri = serviceUri;
+    }
+
     public String fallback(String name) {
         return "AN-NYOUNG " + name;
     }
 
-    @HystrixCommand(commandKey = "greet2")
+    @HystrixCommand()
     public String greet2(String name) {
-        logger.info("HYSTRIX02 attempting to call the greeting-service-ch12 " + new Date());
+        logger.info("HYSTRIX02 : call the greeting-service-ch12");
 
         ParameterizedTypeReference<Map<String, String>> ptr =
                 new ParameterizedTypeReference<Map<String, String>>() {};
