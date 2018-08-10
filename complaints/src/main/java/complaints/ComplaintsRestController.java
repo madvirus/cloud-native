@@ -1,5 +1,6 @@
 package complaints;
 
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/complaints", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class ComplaintsRestController {
@@ -25,11 +27,13 @@ public class ComplaintsRestController {
 
     @PostMapping
     CompletableFuture<ResponseEntity<?>> createComplaint(@RequestBody Map<String, String> body) {
+        log.info("receive createComplaint request");
         String id = UUID.randomUUID().toString();
         FileComplaintCommand complaint = new FileComplaintCommand(id, body.get("company"), body.get("description"));
 
         return this.cg.send(complaint).thenApply(
                 complaintId -> {
+                    log.info("handle: command={}, complaintId={}", complaint, complaintId);
                     URI uri = uri("/complaints/{id}", Collections.singletonMap("id", complaint.getId()));
                     return ResponseEntity.created(uri).build();
                 });
@@ -39,6 +43,7 @@ public class ComplaintsRestController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     CompletableFuture<ResponseEntity<?>> addComment(@PathVariable String complaintId,
                                                     @RequestBody Map<String, Object> body) {
+        log.info("receive addComment request");
         Long when = Long.class.cast(body.getOrDefault("when", System.currentTimeMillis()));
         AddCommentCommand command = new AddCommentCommand(complaintId,
                 UUID.randomUUID().toString(),
@@ -47,6 +52,7 @@ public class ComplaintsRestController {
                 new Date(when));
 
         return cg.send(command).thenApply(commentId -> {
+            log.info("handle: command={}, complaintId={}", command, complaintId);
             Map<String, String> params = new HashMap<>();
             params.put("complaintId", complaintId);
             params.put("commentId", command.getCommentId());
@@ -58,9 +64,13 @@ public class ComplaintsRestController {
 
     @DeleteMapping("/{complaintId}")
     CompletableFuture<ResponseEntity<?>> closeComplaint(@PathVariable String complaintId) {
+        log.info("receive closeComplaint request");
         CloseComplaintCommand csc = new CloseComplaintCommand(complaintId);
 
-        return cg.send(csc).thenApply(none -> ResponseEntity.notFound().build());
+        return cg.send(csc).thenApply(none -> {
+                log.info("handle: command={}, complaintId={}", csc, none);
+                return ResponseEntity.notFound().build();
+        });
     }
 
 
