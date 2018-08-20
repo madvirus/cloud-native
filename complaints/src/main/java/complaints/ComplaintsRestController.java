@@ -62,14 +62,14 @@ public class ComplaintsRestController {
         });
     }
 
-    @DeleteMapping("/{complaintId}")
+    @DeleteMapping(path = "/{complaintId}", consumes = "*/*")
     CompletableFuture<ResponseEntity<?>> closeComplaint(@PathVariable String complaintId) {
         log.info("receive closeComplaint request");
         CloseComplaintCommand csc = new CloseComplaintCommand(complaintId);
 
         return cg.send(csc).thenApply(none -> {
-                log.info("handle: command={}, complaintId={}", csc, none);
-                return ResponseEntity.notFound().build();
+            log.info("handle: command={}, complaintId={}", csc, none);
+            return ResponseEntity.notFound().build();
         });
     }
 

@@ -45,15 +45,11 @@ CREATE TABLE `domain_event_entry` (
 --
 
 DROP TABLE IF EXISTS `hibernate_sequence`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `hibernate_sequence` (
-  `next_val` bigint(20) DEFAULT NULL
+create table hibernate_sequence (
+    next_val INTEGER NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `hibernate_sequence` VALUES (1),(1);
-
+insert into hibernate_sequence values (1);
 --
 -- Table structure for table `saga_entry`
 --
