@@ -5,7 +5,7 @@ CREATE TABLE `complaint` (
   `company` varchar(255) DEFAULT NULL,
   `closed` boolean,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DROP TABLE IF EXISTS `complaint_comment`;
@@ -16,4 +16,4 @@ CREATE TABLE `complaint_comment` (
   `user` varchar(255) NOT NULL,
   `when_date` datetime not null,
   PRIMARY KEY (`comment_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
